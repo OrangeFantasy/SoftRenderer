@@ -9,6 +9,9 @@
 
 #define PI 3.1415926535897932f
 
+constexpr float FLOAT_MAX = 3.402823466e+38f;
+constexpr float FLOAT_MIN = 1.175494351e-38f;
+
 class FMath
 {
 public:

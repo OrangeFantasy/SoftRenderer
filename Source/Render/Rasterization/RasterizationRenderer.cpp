@@ -1,6 +1,6 @@
-#include "Render/RasterizationRenderer.h"
+#include "Render/Rasterization/RasterizationRenderer.h"
 
-#include "Render/Primitive.h"
+#include "Render/Rasterization/Primitive.h"
 #include "Geometry/Triangle.h"
 #include "Geometry/Mesh.h"
 
@@ -264,43 +264,43 @@ void FRasterizationRenderer::RenderTriangle(const FTrianglePrimitive& TrianglePr
     }
 }
 
-void FRasterizationRenderer::RenderWireframe(const FTriangle& Triangle)
-{
-    DrawLine(Triangle.A, Triangle.B);
-    DrawLine(Triangle.B, Triangle.C);
-    DrawLine(Triangle.C, Triangle.A);
-}
+// void FRasterizationRenderer::RenderWireframe(const FTriangle& Triangle)
+// {
+//     DrawLine(Triangle.A, Triangle.B);
+//     DrawLine(Triangle.B, Triangle.C);
+//     DrawLine(Triangle.C, Triangle.A);
+// }
 
-void FRasterizationRenderer::DrawLine(const FVertex& Start, const FVertex& End)
-{
-    int32 X1 = Start.Position.X, X2 = End.Position.X;
-    int32 Y1 = Start.Position.Y, Y2 = End.Position.Y;
+// void FRasterizationRenderer::DrawLine(const FVertex& Start, const FVertex& End)
+// {
+//     int32 X1 = Start.Position.X, X2 = End.Position.X;
+//     int32 Y1 = Start.Position.Y, Y2 = End.Position.Y;
 
-    int32 DX = FMath::Abs(X2 - X1), DY = FMath::Abs(Y2 - Y1);
-    int32 StepX = X1 < X2 ? 1 : -1;
-    int32 StepY = Y1 < Y2 ? 1 : -1;
+//     int32 DX = FMath::Abs(X2 - X1), DY = FMath::Abs(Y2 - Y1);
+//     int32 StepX = X1 < X2 ? 1 : -1;
+//     int32 StepY = Y1 < Y2 ? 1 : -1;
 
-    int32 Error = DX - DY;
+//     int32 Error = DX - DY;
 
-    while ((X1 != X2) || (Y1 != Y2))
-    {
-        int32 Error2 = Error * 2;
+//     while ((X1 != X2) || (Y1 != Y2))
+//     {
+//         int32 Error2 = Error * 2;
 
-        if (Error2 > -DY)
-        {
-            Error -= DY;
-            X1 += StepX;
-        }
+//         if (Error2 > -DY)
+//         {
+//             Error -= DY;
+//             X1 += StepX;
+//         }
 
-        if (Error2 < DX)
-        {
-            Error += DX;
-            Y1 += StepY;
-        }
+//         if (Error2 < DX)
+//         {
+//             Error += DX;
+//             Y1 += StepY;
+//         }
 
-        FrameBuffer[GetPixelIndex(X1, Y1)] = FColor::Green;
-    }
-}
+//         FrameBuffer[GetPixelIndex(X1, Y1)] = FColor::Green;
+//     }
+// }
 
 int32 FRasterizationRenderer::GetPixelIndex(int32 X, int32 Y)
 {

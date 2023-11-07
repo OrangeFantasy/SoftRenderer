@@ -1,4 +1,4 @@
-#include "Render/Primitive.h"
+#include "Render/Rasterization/Primitive.h"
 
 bool FTrianglePrimitive::PointInsideTriangle(float X, float Y, const FTrianglePrimitive& Triangle)
 {

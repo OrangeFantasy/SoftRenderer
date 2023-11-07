@@ -1,22 +1,3 @@
-// #pragma once
-
-// #include "CoreTypes.h"
-// #include "Geometry/Vertex.h"
-
-// struct FTexture;
-
-// struct FMesh
-// {
-//     FString Name;
-//     TArray<FVertex> Vertices;
-//     TArray<FVector3i> Indices;
-
-//     bool bVisible = true;
-
-//     FTexture* Texture = nullptr;
-//     void SetTexture(FTexture* InTexture) { Texture = InTexture; }
-// };
-
 #pragma once
 
 #include "CoreTypes.h"

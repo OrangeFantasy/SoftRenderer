@@ -1,11 +1,11 @@
 #pragma once
 
 #include "CoreTypes.h"
-#include "Render/Shader.h"
 #include "Render/Camera.h"
+#include "Render/Rasterization/Shader.h"
 
 struct FVertex;
-struct FTriangle;
+// struct FTriangle;
 struct FMesh;
 struct FTrianglePrimitive;
 
@@ -58,8 +58,8 @@ private:
     void RenderInternal(const FMesh* Mesh);
 
     void RenderTriangle(const FTrianglePrimitive& TrianglePrimitive, const struct FTexture* Texture);
-    void RenderWireframe(const FTriangle& Triangle);
-    void DrawLine(const FVertex& Start, const FVertex& End);
+    // void RenderWireframe(const FTriangle& Triangle);
+    // void DrawLine(const FVertex& Start, const FVertex& End);
 
     int32 GetPixelIndex(int32 X, int32 Y);
 
