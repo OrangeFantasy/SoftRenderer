@@ -86,17 +86,19 @@ void FRasterizationRenderer::ComputeViewportMatrix()
 
 void FRasterizationRenderer::UpdateViewMatrix()
 {
-    ViewMatrix = FMatrix4(           //
-        1, 0, 0, -Camera.Position.X, //
-        0, 1, 0, -Camera.Position.Y, //
-        0, 0, 1, -Camera.Position.Z, //
-        0, 0, 0, 1                   //
+    const FVector& CameraPosition = Camera.GetCameraPosition();
+
+    ViewMatrix = FMatrix4(          //
+        1, 0, 0, -CameraPosition.X, //
+        0, 1, 0, -CameraPosition.Y, //
+        0, 0, 1, -CameraPosition.Z, //
+        0, 0, 0, 1                  //
     );
 }
 
 void FRasterizationRenderer::UpdateProjectionMatrix()
 {
-    float EyeFov = FMath::DegreesToRadians(Camera.Fov / 2.0f);
+    float EyeFov = FMath::DegreesToRadians(Camera.GetCameraFov() / 2.0f);
     float AspectRatio = (float)Viewport.Width / Viewport.Height;
 
     const float& ZNear = Viewport.NearPlane;
@@ -125,7 +127,6 @@ void FRasterizationRenderer::Render()
 {
     UpdateViewMatrix();
     UpdateProjectionMatrix();
-
     Shader->UploadViewPorjectionMatrix(ViewMatrix, ProjectionMatrix);
 
     for (FMesh* Mesh : Meshes)
@@ -324,4 +325,8 @@ void FRasterizationRenderer::ResetViewportSize(int32 InWidth, int32 InHeight)
 void FRasterizationRenderer::SetCameraViewRadius(float DeltaRadius)
 {
     Camera.SetViewRadius(DeltaRadius);
+}
+void FRasterizationRenderer::MoveCameraView(float DeltaAzimuthAngle, float DeltaZenithAngle)
+{
+    Camera.MoveCamera(DeltaAzimuthAngle, DeltaZenithAngle);
 }

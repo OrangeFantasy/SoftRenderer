@@ -6,6 +6,7 @@
 #include <optional>
 
 class FRasterizationRenderer;
+class FMouse;
 
 class FWindow
 {
@@ -42,6 +43,9 @@ private:
     static LRESULT CALLBACK HandleMsgThunk(_In_ HWND HWnd, _In_ UINT Msg, _In_ WPARAM WParam, _In_ LPARAM LParam) noexcept;
     LRESULT HandleMsg(HWND HWnd, UINT Msg, WPARAM WParam, LPARAM LParam) noexcept;
 
+    bool CreateExternalDevices() noexcept;
+    void DestroyExternalDevices() noexcept;
+
 private:
     HWND WindowHandle;
 
@@ -50,4 +54,5 @@ private:
     LPCTSTR WindowTitle;
 
     FRasterizationRenderer* Renderer = nullptr;
+    FMouse* Mouse;
 };

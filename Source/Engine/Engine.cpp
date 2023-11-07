@@ -32,7 +32,7 @@ bool OEngine::Initialize()
     if (Window && Window->Initialize())
     {
         FViewport Viewport(ViewportWidth, ViewportHeight, 0.1f, 50.f);
-        FCamera Camera(45.0f, FVector(0.f, 1.f, 10.f));
+        FCamera Camera(FVector(0.f, 1.f, 10.f), 45.0f);
 
         Renderer = new FRasterizationRenderer();
         if (Renderer->Initialize(Viewport, Camera, EShaderType::TextureNoLightShader))

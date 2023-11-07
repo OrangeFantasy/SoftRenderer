@@ -1,7 +1,7 @@
 #include "Render/Window.h"
 
 #include "Render/RasterizationRenderer.h"
-#include "Window.h"
+#include "Devices/Mouse.h"
 
 // ********************
 //     Window Class
@@ -51,6 +51,7 @@ FWindow::FWindow(int32 InWidth, int32 InHeight, const FChar* InTitle) : Width(In
 
 FWindow::~FWindow()
 {
+    DestroyExternalDevices();
     DestroyWindow(WindowHandle);
 }
 
@@ -79,7 +80,7 @@ bool FWindow::Initialize()
         );
 
         // Show window.
-        if (WindowHandle != nullptr)
+        if (WindowHandle != nullptr && CreateExternalDevices())
         {
             ShowWindow(WindowHandle, SW_SHOW);
             UpdateWindow(WindowHandle);
@@ -87,6 +88,22 @@ bool FWindow::Initialize()
         }
     }
     return false;
+}
+
+bool FWindow::CreateExternalDevices() noexcept
+{
+    Mouse = new FMouse();
+
+    return Mouse != nullptr;
+}
+
+void FWindow::DestroyExternalDevices() noexcept
+{
+    if (Mouse != nullptr)
+    {
+        delete Mouse;
+        Mouse = nullptr;
+    }
 }
 
 void FWindow::SetRenderer(FRasterizationRenderer* InRenderer) noexcept
@@ -170,6 +187,24 @@ LRESULT FWindow::HandleMsg(HWND HWnd, UINT Msg, WPARAM WParam, LPARAM LParam) no
     {
         int32 Delta = GET_WHEEL_DELTA_WPARAM(WParam);
         Renderer->SetCameraViewRadius(-Delta / WHEEL_DELTA);
+        break;
+    }
+    case WM_MOUSEMOVE:
+    {
+        POINTS Point = MAKEPOINTS(LParam);
+
+        // Cursor n window
+        if (Point.x >= 0 && Point.x < Width && Point.y >= 0 && Point.y < Height)
+        {
+            if (WParam & MK_LBUTTON)
+            {
+                float DeltaX = FMath::DegreesToRadians((float)(Point.x - Mouse->GetPosX()) * 0.25f);
+                float DeltaY = FMath::DegreesToRadians((float)(Point.y - Mouse->GetPosY()) * 0.25f);
+
+                Renderer->MoveCameraView(DeltaX, -DeltaY);
+            }
+            Mouse->SetPos(Point.x, Point.y);
+        }
         break;
     }
     default:

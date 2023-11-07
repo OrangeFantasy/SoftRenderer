@@ -2,6 +2,7 @@
 
 #include "CoreTypes.h"
 #include "Render/Shader.h"
+#include "Render/Camera.h"
 
 struct FVertex;
 struct FTriangle;
@@ -28,19 +29,6 @@ struct FViewport
     }
 };
 
-struct FCamera
-{
-    float Fov = 60.f;
-    FVector Position = FVector(0.f, 0.f, 5.f);
-
-    float Radius = 10.f;
-    void SetViewRadius(float DeltaRadius)
-    {
-        Radius = FMath::Clamp(Radius + DeltaRadius, 5.f, 100.f);
-        Position = FVector(0.f, 1.f, Radius);
-    }
-};
-
 class FRasterizationRenderer
 {
 public:
@@ -60,6 +48,7 @@ public:
 
     void ResetViewportSize(int32 InWidth, int32 InHeight);
     void SetCameraViewRadius(float DeltaRadius);
+    void MoveCameraView(float DeltaAzimuthAngle, float DeltaZenithAngle);
 
 private:
     void ComputeViewportMatrix();
@@ -67,7 +56,7 @@ private:
     void UpdateProjectionMatrix();
 
     void RenderInternal(const FMesh* Mesh);
-    
+
     void RenderTriangle(const FTrianglePrimitive& TrianglePrimitive, const struct FTexture* Texture);
     void RenderWireframe(const FTriangle& Triangle);
     void DrawLine(const FVertex& Start, const FVertex& End);
