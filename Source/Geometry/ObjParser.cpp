@@ -14,58 +14,60 @@ enum class EVertexType
 
 FMesh FObjParser::Parse(const FString& FilePath)
 {
-    TArray<FVector> Positions;
-    TArray<FVector> Normals;
-    TArray<FVector2> TexCoords;
-
+    FMesh Mesh;
     FFileStream ObjFile(FilePath);
 
-    FMesh Mesh;
-    FString Line, Key, X, Y, Z;
-    int32 VertexIndex = 0;
-    while (!ObjFile.eof())
+    if (ObjFile.is_open())
     {
-        std::getline(ObjFile, Line);
-        FStringStream LineStream(Line);
-        LineStream >> Key;
+        TArray<FVector> Positions;
+        TArray<FVector> Normals;
+        TArray<FVector2> TexCoords;
 
-        if (Key == AUTO_TEXT("v"))
+        FString Line, Key, X, Y, Z;
+        int32 VertexIndex = 0;
+        while (!ObjFile.eof())
         {
-            LineStream >> X >> Y >> Z;
-            FVector Position = FVector(std::stof(X), std::stof(Y), std::stof(Z));
-            Positions.emplace_back(std::move(Position));
-        }
-        else if (Key == AUTO_TEXT("vn"))
-        {
-            LineStream >> X >> Y >> Z;
-            FVector Normal = FVector(std::stof(X), std::stof(Y), std::stof(Z));
-            Normals.emplace_back(std::move(Normal));
-        }
-        else if (Key == AUTO_TEXT("vt"))
-        {
-            LineStream >> X >> Y;
-            FVector2 TexCoord = FVector2(std::stof(X), std::stof(Y));
-            TexCoords.emplace_back(std::move(TexCoord));
-        }
-        else if (Key == AUTO_TEXT("f"))
-        {
-            TArray<FVertex> Vertices;
-            GenerateVertices(Vertices, Positions, Normals, TexCoords, Line);
+            std::getline(ObjFile, Line);
+            FStringStream LineStream(Line);
+            LineStream >> Key;
 
-            for (FVertex& Vertex : Vertices)
+            if (Key == AUTO_TEXT("v"))
             {
-                Mesh.Vertices.emplace_back(Vertex);
+                LineStream >> X >> Y >> Z;
+                FVector Position = FVector(std::stof(X), std::stof(Y), std::stof(Z));
+                Positions.emplace_back(std::move(Position));
             }
-            Mesh.Indices.emplace_back(FVector3i(VertexIndex, VertexIndex + 1, VertexIndex + 2));
+            else if (Key == AUTO_TEXT("vn"))
+            {
+                LineStream >> X >> Y >> Z;
+                FVector Normal = FVector(std::stof(X), std::stof(Y), std::stof(Z));
+                Normals.emplace_back(std::move(Normal));
+            }
+            else if (Key == AUTO_TEXT("vt"))
+            {
+                LineStream >> X >> Y;
+                FVector2 TexCoord = FVector2(std::stof(X), std::stof(Y));
+                TexCoords.emplace_back(std::move(TexCoord));
+            }
+            else if (Key == AUTO_TEXT("f"))
+            {
+                TArray<FVertex> Vertices;
+                GenerateVertices(Vertices, Positions, Normals, TexCoords, Line);
 
-            VertexIndex += 3;
+                for (FVertex& Vertex : Vertices)
+                {
+                    Mesh.Vertices.emplace_back(Vertex);
+                }
+                Mesh.Indices.emplace_back(FVector3i(VertexIndex, VertexIndex + 1, VertexIndex + 2));
+
+                VertexIndex += 3;
+            }
+
+            Key = AUTO_TEXT("");
         }
-
-        Key = AUTO_TEXT("");
     }
-
     ObjFile.close();
-    
+
     return Mesh;
 }
 
