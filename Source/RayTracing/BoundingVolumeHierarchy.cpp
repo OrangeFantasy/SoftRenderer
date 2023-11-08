@@ -1,15 +1,14 @@
 #include "RayTracing/BoundingVolumeHierarchy.h"
 
-#include "Geometry/Geometry.h"
-#include "Geometry/BoundingBox.h"
-
 #include <algorithm>
+#include "Geometry/Geometry.h"
+#include "RayTracing/HitResult.h"
 
 // ********************
 //       BVH Node
 // ********************
 
-FBVHNode::FBVHNode() : Left(nullptr), Right(nullptr), Geometry(nullptr), BoundingBox(FBoundingBox()) /**, Area(0.0f)*/ {}
+FBVHNode::FBVHNode() : Left(nullptr), Right(nullptr), Object(nullptr), BoundingBox(FBoundingBox()) /**, Area(0.0f)*/ {}
 
 FBVHNode::~FBVHNode()
 {
@@ -29,9 +28,14 @@ FBVHNode::~FBVHNode()
 //         BVH
 // ********************
 
-FBoundingVolumeHierarchy::FBoundingVolumeHierarchy(TArray<FGeometry*> Geometries)
+FBoundingVolumeHierarchy::FBoundingVolumeHierarchy(TArray<FGeometry*> Primitives)
 {
-    Root = BuildBVH(Geometries, 0, Geometries.size() - 1);
+    for(FGeometry* Primitive : Primitives)
+    {
+        Primitive->BuildBVH();
+    }
+
+    Root = BuildBVH(Primitives, 0, Primitives.size());
 }
 
 FBoundingVolumeHierarchy::~FBoundingVolumeHierarchy() noexcept
@@ -43,39 +47,95 @@ FBoundingVolumeHierarchy::~FBoundingVolumeHierarchy() noexcept
     }
 }
 
-FBVHNode* FBoundingVolumeHierarchy::BuildBVH(TArray<FGeometry*>& Geometries, int32 Left, int32 Right)
+FBVHNode* FBoundingVolumeHierarchy::BuildBVH(TArray<FGeometry*>& Primitives, int32 Begin, int32 End)
 {
-    if (Left > Right)
+    if (Begin >= End)
     {
         return nullptr;
     }
 
-    // [Left, Right]
-    // Left == Right: Leaf node.
+    // [Left, Right)
+    // Right - Left == 1: Leaf node.
 
     FBVHNode* BVHNode = new FBVHNode();
-    if (Left == Right)
+    if (End - Begin == 1)
     {
-        BVHNode->Geometry = Geometries[Left];
-        BVHNode->BoundingBox = Geometries[Left]->GetBoundingBox();
+        BVHNode->Object = Primitives[Begin];
+        BVHNode->BoundingBox = Primitives[Begin]->GetBoundingBox();
     }
     else
     {
         FBoundingBox CentroidBoundingBox;
-        for (int32 i = Left; i <= Right; ++i)
+        for (int32 i = Begin; i < End; ++i)
         {
-            CentroidBoundingBox |= Geometries[i]->GetBoundingBox().Centroid();
+            CentroidBoundingBox |= Primitives[i]->GetBoundingBox().Centroid();
         }
 
         int32 Dim = CentroidBoundingBox.MaxAxis();
-        ::std::sort(Geometries.begin() + Left, Geometries.begin() + Right + 1,
+        ::std::sort(Primitives.begin() + Begin, Primitives.begin() + End,
             [&Dim](FGeometry* A, FGeometry* B) { return A->GetBoundingBox().Centroid()[Dim] < B->GetBoundingBox().Centroid()[Dim]; });
 
-        // [Left, Right] -> [Left, Mid] | [Mid + 1, Right]
-        int32 Mid = (Left + Right) / 2;
-        BVHNode->Left = BuildBVH(Geometries, Left, Mid);
-        BVHNode->Right = BuildBVH(Geometries, Mid + 1, Right);
+        // [Left, Right) -> [Left, Mid) | [Mid, Right)
+        int32 Mid = (Begin + End) / 2;
+        BVHNode->Left = BuildBVH(Primitives, Begin, Mid);
+        BVHNode->Right = BuildBVH(Primitives, Mid, End);
         BVHNode->BoundingBox = BVHNode->Left->BoundingBox | BVHNode->Right->BoundingBox;
     }
     return BVHNode;
+}
+
+void FBoundingVolumeHierarchy::LineTrace(FHitResult& OutHitResult, const FRay& Ray)
+{
+    LineTrace(OutHitResult, Root, Ray);
+}
+
+void FBoundingVolumeHierarchy::LineTrace(FHitResult& OutHitResult, const FBVHNode* Node, const FRay& Ray)
+{
+    if (Node != nullptr && Node->BoundingBox.IsIntersecting(Ray))
+    {
+        // leaf node.
+        if (Node->Object != nullptr)
+        {
+            Node->Object->LineTrace(OutHitResult, Ray);
+            return;
+        }
+
+        FHitResult LeftHit, RightHit;
+        LineTrace(LeftHit, Node->Left, Ray);
+        LineTrace(RightHit, Node->Right, Ray);
+
+        OutHitResult = LeftHit.Time < RightHit.Time ? LeftHit : RightHit;
+    }
+}
+
+static int32 NodeNum = 0;
+
+void PreOrderTraversal(FBVHNode* Root, int32 Depth)
+{
+    if (Root)
+    {
+        if (Root->Object != nullptr)
+        {
+            ++NodeNum;
+        }
+
+        FString DebugString;
+        for (int32 i = 0; i < Depth; ++i)
+        {
+            DebugString += AUTO_TEXT("  ");
+        }
+        DebugString += AUTO_TEXT("Flag\n");
+
+        OutputDebugString(DebugString.c_str());
+        PreOrderTraversal(Root->Left, Depth + 1);
+        PreOrderTraversal(Root->Right, Depth + 1);
+    }
+}
+
+void FBoundingVolumeHierarchy::Print()
+{
+    PreOrderTraversal(Root, 1);
+
+    FString DebugString = AUTO_TEXT("Node Num: ") + std::to_wstring(NodeNum) + AUTO_TEXT("\n");
+    OutputDebugString(DebugString.c_str());
 }

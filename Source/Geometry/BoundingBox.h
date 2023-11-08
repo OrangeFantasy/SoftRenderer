@@ -2,6 +2,8 @@
 
 #include "CoreTypes.h"
 
+struct FRay;
+
 struct FBoundingBox
 {
     FVector MinPoint;
@@ -29,4 +31,6 @@ public:
     FVector Diagonal() const;
     int32 MaxAxis() const;
     float SurfaceArea() const;
+
+    bool IsIntersecting(const FRay& Ray) const;
 };

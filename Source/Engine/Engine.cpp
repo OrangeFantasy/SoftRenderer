@@ -53,27 +53,27 @@ int32 OEngine::Run()
 {
     int32 MSAAFactor = 4;
 
-    FMesh Mesh = FObjParser::Parse(AUTO_TEXT(R"(../../Resources/teapot_mesh.obj)"));
-    FTexture Texture = FTexture(AUTO_TEXT("../../Resources/lapis_albedo.png"));
+    FMesh Mesh = FObjParser::Parse(AUTO_TEXT(R"(E:\_Project\C++\_Renderer\Resources\teapot_mesh.obj)"));
+    FTexture Texture = FTexture(AUTO_TEXT(R"(E:\_Project\C++\_Renderer\Resources\lapis_albedo.png)"));
     // FMesh Mesh = FObjParser::Parse(AUTO_TEXT("../../Resources/Spot/Spot.obj"));
     // FTexture Texture = FTexture(AUTO_TEXT("../../Resources/Spot/spot_texture.png"));
     Mesh.SetTexture(&Texture);
     Mesh.SetTransform(FVector::ZeroVector, FVector(90.0f, 0.0f, 180.0f), FVector(1.5f));
 
-    Mesh.BuildBVH();
-    return 0;
+    // Mesh.BuildBVH();
+    // return 0;
 
-    // Renderer->LoadMesh(&Mesh);
-    // Renderer->SetMultiSampleAntiAliasing(false, MSAAFactor);
+    Renderer->LoadMesh(&Mesh);
+    Renderer->SetMultiSampleAntiAliasing(false, MSAAFactor);
 
-    // while (true)
-    // {
-    //     if (std::optional<int32> RunCode = FWindow::ProcessMessages())
-    //     {
-    //         return *RunCode;
-    //     }
-    //     Tick(0.1f);
-    // }
+    while (true)
+    {
+        if (std::optional<int32> RunCode = FWindow::ProcessMessages())
+        {
+            return *RunCode;
+        }
+        Tick(0.1f);
+    }
 }
 
 void OEngine::Tick(float DeltaTime)

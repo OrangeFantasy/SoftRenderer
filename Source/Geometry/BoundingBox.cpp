@@ -1,4 +1,5 @@
 #include "Geometry/BoundingBox.h"
+#include "RayTracing/Ray.h"
 
 FBoundingBox::FBoundingBox() : MinPoint(FVector(FLOAT_MAX)), MaxPoint(FVector(FLOAT_MIN)) {}
 
@@ -77,4 +78,25 @@ float FBoundingBox::SurfaceArea() const
 {
     FVector Diag = Diagonal();
     return 2.f * (Diag.X * Diag.Y + Diag.X * Diag.Z + Diag.Y * Diag.Z);
+}
+
+bool FBoundingBox::IsIntersecting(const FRay& Ray) const
+{
+    float TimeEnter = FLOAT_MIN;
+    float TimeExit = FLOAT_MAX;
+
+    for (int32 Axis = 0; Axis < 3; ++Axis)
+    {
+        float Tmin = (MinPoint[Axis] - Ray.Origin[Axis]) / Ray.Direction[Axis];
+        float Tmax = (MaxPoint[Axis] - Ray.Origin[Axis]) / Ray.Direction[Axis];
+        if (Ray.Direction[Axis] < 0.0f)
+        {
+            FMath::Swap(Tmin, Tmax);
+        }
+
+        TimeEnter = FMath::Max(TimeEnter, Tmin);
+        TimeExit = FMath::Min(TimeExit, Tmax);
+    }
+
+    return TimeEnter <= TimeExit && TimeExit >= 0.0f;
 }

@@ -1,9 +1,15 @@
 #include "Geometry/Triangle.h"
 
-FTriangle::FTriangle(const FVertex& InA, const FVertex& InB, const FVertex& InC) : A(InA), B(InB), C(InC)
+#include "Geometry/BoundingBox.h"
+#include "RayTracing/HitResult.h"
+#include "RayTracing/Ray.h"
+
+FTriangle::FTriangle(const FVertex& InA, const FVertex& InB, const FVertex& InC, FMaterial* InMaterial)
+    : A(InA), B(InB), C(InC), Material(InMaterial)
 {
     FVector E1 = B.Position - A.Position;
     FVector E2 = C.Position - A.Position;
+    Normal = FVector::CrossProduct(E1, E2).GetSafeNormal();
     Area = 0.5f * FVector::CrossProduct(E1, E2).Length();
 }
 
@@ -17,44 +23,49 @@ float FTriangle::GetArea() const
     return Area;
 }
 
-// void FTriangle::SetVertex(int32 Index, const FVertex& Vertex)
-// {
-//     Vertices[Index] = Vertex;
-// }
+void FTriangle::LineTrace(FHitResult& OutHitResult, const FRay& Ray)
+{
+    if (FVector::DotProduct(Ray.Direction, Normal) < 0.0f)
+    {
+        // Möller–Trumbore:
+        // O + t * d = (1 - u - v) * P0 + u * P1 + v * P2
+        // => O - P0 = (P1 - P0) * u + (P2 - P0) * v - t * d
+        // => S      = E1 * u        + E2 * v        - t * d
+        //                   | t |
+        // => S = [-d E1 E2] | u |
+        //                   | v |
+        // => t = det([S E1 E2]) / det([-d E1 E2])
+        //        (S x E1) · E2
+        // => t = --------------
+        //        E1 · (d x E2)
+        // => t = (S2 · E2) / (S1 · E1)
+        //
+        // u = (S1 · S) / (S1 · E1)
+        // v = (S2 · d) / (S1 · E1)
 
-// bool FTriangle::PointInsideTriangle(float X, float Y, const FTriangle& Triangle)
-// {
-//     const FVector& A = Triangle.A.Position;
-//     const FVector& B = Triangle.B.Position;
-//     const FVector& C = Triangle.C.Position;
+        FVector E1 = B.Position - A.Position;
+        FVector E2 = C.Position - A.Position;
+        FVector S1 = FVector::CrossProduct(Ray.Direction, E2);
+        float Det = FVector::DotProduct(S1, E1);
+        if (FMath::Abs(Det) > KINDA_SMALL_NUMBER)
+        {
+            FVector S = Ray.Direction - A.Position;
+            FVector S2 = FVector::CrossProduct(S, E1);
 
-//     const FVector P = FVector(X, Y, A.Z);
-//     const FVector AC = C - A;
-//     const FVector CB = B - C;
-//     const FVector BA = A - B;
-//     const FVector AP = P - A;
-//     const FVector BP = P - B;
-//     const FVector CP = P - C;
+            float DetInv = 1.0f / Det;
+            float T = DetInv * FVector::DotProduct(S2, E2);
+            float U = DetInv * FVector::DotProduct(S1, S);
+            float V = DetInv * FVector::DotProduct(S2, Ray.Direction);
 
-//     if (AP.Cross(AC).Dot(BP.Cross(BA)) > 0.0f    //
-//         && BP.Cross(BA).Dot(CP.Cross(CB)) > 0.0f //
-//         && CP.Cross(CB).Dot(AP.Cross(AC)) > 0.0f)
-//     {
-//         return true;
-//     }
-//     return false;
-// }
-
-// void FTriangle::GetTriangleBarycentric2D(float X, float Y, const FTriangle& Triangle, float& OutU, float& OutV, float& OutW)
-// {
-//     const FVector& A = Triangle.A.Position;
-//     const FVector& B = Triangle.B.Position;
-//     const FVector& C = Triangle.C.Position;
-
-//     OutU = (X * (B.Y - C.Y) + (C.X - B.X) * Y + B.X * C.Y - C.X * B.Y) //
-//            / (A.X * (B.Y - C.Y) + (C.X - B.X) * A.Y + B.X * C.Y - C.X * B.Y);
-//     OutV = (X * (C.Y - A.Y) + (A.X - C.X) * Y + C.X * A.Y - A.X * C.Y) //
-//            / (B.X * (C.Y - A.Y) + (A.X - C.X) * B.Y + C.X * A.Y - A.X * C.Y);
-//     OutW = (X * (A.Y - B.Y) + (B.X - A.X) * Y + A.X * B.Y - B.X * A.Y) //
-//            / (C.X * (A.Y - B.Y) + (B.X - A.X) * C.Y + A.X * B.Y - B.X * A.Y);
-// }
+            if (T >= 0 && U >= 0.0f && V >= 0.0f && U + V <= 1.0f)
+            {
+                OutHitResult.bHit = true;
+                OutHitResult.Location = Ray.GetLocation(T);
+                OutHitResult.Normal = Normal;
+                OutHitResult.Time = T;
+                OutHitResult.Object = this;
+                OutHitResult.Material = Material;
+            }
+        }
+    }
+}

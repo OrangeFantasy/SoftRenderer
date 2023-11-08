@@ -109,6 +109,7 @@ public:
     }
 
     T& operator[](int32 Index);
+    const T& operator[](int32 Index) const;
 
     bool operator==(const TVector<T>& V) const;
     bool operator!=(const TVector<T>& V) const;
@@ -262,6 +263,12 @@ inline TVector<T> TVector<T>::operator/=(const TVector<T>& V)
 
 template <typename T>
 inline T& TVector<T>::operator[](int32 Index)
+{
+    return XYZ[Index];
+}
+
+template <typename T>
+inline const T& TVector<T>::operator[](int32 Index) const
 {
     return XYZ[Index];
 }

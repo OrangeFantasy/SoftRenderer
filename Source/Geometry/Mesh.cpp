@@ -1,6 +1,7 @@
 #include "Geometry/Mesh.h"
 #include "Geometry/Triangle.h"
 #include "RayTracing/BoundingVolumeHierarchy.h"
+#include "Mesh.h"
 
 FMesh::FMesh() : Name(AUTO_TEXT("Mesh")) {}
 
@@ -56,13 +57,22 @@ void FMesh::BuildBVH()
 {
     for (const FVector3i& Index : Indices)
     {
-        FTriangle* Triangle = new FTriangle(Vertices[Index.X], Vertices[Index.Y], Vertices[Index.Z]);
+        FTriangle* Triangle = new FTriangle(Vertices[Index.X], Vertices[Index.Y], Vertices[Index.Z], Material);
         BoundingBox |= Triangle->GetBoundingBox();
         Area += Triangle->GetArea();
         RTPrimitives.emplace_back(Triangle);
     }
 
     BVH = new FBoundingVolumeHierarchy(RTPrimitives);
+    // BVH->Print();
+}
+
+void FMesh::LineTrace(FHitResult& OutHitResult, const FRay& Ray)
+{
+    if (BVH != nullptr)
+    {
+        BVH->LineTrace(OutHitResult, Ray);
+    }
 }
 
 void FMesh::DestroyBVH() noexcept

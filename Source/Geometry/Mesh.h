@@ -2,12 +2,14 @@
 
 #include "Geometry/Geometry.h"
 #include "Geometry/Vertex.h"
+#include "Geometry/BoundingBox.h"
 
 struct FTexture;
+struct FMaterial;
 class FTriangle;
 class FBoundingVolumeHierarchy;
 
-class FMesh
+class FMesh : public FGeometry
 {
     // ********************
     //        Basic
@@ -25,12 +27,16 @@ public:
     void SetTexture(FTexture* InTexture) { Texture = InTexture; }
     const FTexture* GetTexture() const { return Texture; }
 
+    void SetMaterial(FMaterial* InMaterial) { Material = InMaterial; }
+    const FMaterial* GetMaterial() const { return Material; }
+
 private:
     FString Name;
     TArray<FVertex> Vertices;
     TArray<FVector3i> Indices;
 
     FTexture* Texture = nullptr;
+    FMaterial* Material = nullptr;
 
     // ********************
     //      Transform
@@ -54,7 +60,11 @@ private:
     // ********************
 
 public:
-    void BuildBVH();
+    virtual void BuildBVH() override;
+    virtual void LineTrace(FHitResult& OutHitResult, const FRay& Ray);
+
+    virtual FBoundingBox GetBoundingBox() const override { return BoundingBox; };
+    virtual float GetArea() const override { return Area; };
 
 private:
     void DestroyBVH() noexcept;
@@ -62,7 +72,7 @@ private:
 private:
     FBoundingVolumeHierarchy* BVH = nullptr;
 
-    TArray<FGeometry*> RTPrimitives;
+    TArray<struct FGeometry*> RTPrimitives;
     FBoundingBox BoundingBox;
     float Area = 0.0f;
 };

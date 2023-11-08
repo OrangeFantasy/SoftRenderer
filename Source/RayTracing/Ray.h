@@ -17,7 +17,7 @@ struct FRay
     {
     }
 
-    FVector Position(float T) const
+    FVector GetLocation(float T) const
     {
         return Origin + Direction * T;
     }
