@@ -1,4 +1,4 @@
-#include "Geometry/Texture.h"
+#include "Material/Texture.h"
 
 FTexture::FTexture(const FString& Path)
 {

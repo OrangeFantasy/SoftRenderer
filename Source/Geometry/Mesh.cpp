@@ -1,4 +1,20 @@
 #include "Geometry/Mesh.h"
+#include "Geometry/Triangle.h"
+#include "RayTracing/BoundingVolumeHierarchy.h"
+
+FMesh::FMesh() : Name(AUTO_TEXT("Mesh")) {}
+
+FMesh::~FMesh()
+{
+    DestroyBVH();
+}
+
+void FMesh::SetTransform(const FVector& InTranslation, const FVector& InRotation, const FVector& InScale)
+{
+    Translation = InTranslation;
+    Rotation = InRotation;
+    Scale = InScale;
+}
 
 void FMesh::UpdateModelMatrix()
 {
@@ -19,19 +35,50 @@ void FMesh::UpdateModelMatrix()
 
     // Scale Matrix.
     FMatrix4 ScaleMatrix = FMatrix4( //
-        Scale.X, 0, 0, 0,      //
-        0, Scale.Y, 0, 0,      //
-        0, 0, Scale.Z, 0,      //
+        Scale.X, 0, 0, 0,            //
+        0, Scale.Y, 0, 0,            //
+        0, 0, Scale.Z, 0,            //
         0, 0, 0, 1                   //
     );
 
     // Translation Matrix.
     FMatrix4 TranslationMatrix = FMatrix4( //
-        1, 0, 0, Position.X,         //
-        0, 1, 0, Position.Y,         //
-        0, 0, 1, Position.Z,         //
+        1, 0, 0, Translation.X,            //
+        0, 1, 0, Translation.Y,            //
+        0, 0, 1, Translation.Z,            //
         0, 0, 0, 1                         //
     );
 
     ModelMatrix = TranslationMatrix * RotationMatrix * ScaleMatrix;
+}
+
+void FMesh::BuildBVH()
+{
+    for (const FVector3i& Index : Indices)
+    {
+        FTriangle* Triangle = new FTriangle(Vertices[Index.X], Vertices[Index.Y], Vertices[Index.Z]);
+        BoundingBox |= Triangle->GetBoundingBox();
+        Area += Triangle->GetArea();
+        RTPrimitives.emplace_back(Triangle);
+    }
+
+    BVH = new FBoundingVolumeHierarchy(RTPrimitives);
+}
+
+void FMesh::DestroyBVH() noexcept
+{
+    if (BVH != nullptr)
+    {
+        delete BVH;
+        BVH = nullptr;
+    }
+
+    for (FGeometry* Primitive : RTPrimitives)
+    {
+        if (Primitive != nullptr)
+        {
+            delete Primitive;
+            Primitive = nullptr;
+        }
+    }
 }

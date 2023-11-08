@@ -3,7 +3,7 @@
 #include "Render/Rasterization/RasterizationRenderer.h"
 #include "Render/Window.h"
 #include "Geometry/ObjParser.h"
-#include "Geometry/Texture.h"
+#include "Material/Texture.h"
 
 OEngine::OEngine()
 {
@@ -58,20 +58,22 @@ int32 OEngine::Run()
     // FMesh Mesh = FObjParser::Parse(AUTO_TEXT("../../Resources/Spot/Spot.obj"));
     // FTexture Texture = FTexture(AUTO_TEXT("../../Resources/Spot/spot_texture.png"));
     Mesh.SetTexture(&Texture);
-    Mesh.Scale = FVector(1.5f);
-    Mesh.Rotation = FVector(90.0f, 0.0f, 180.0f);
+    Mesh.SetTransform(FVector::ZeroVector, FVector(90.0f, 0.0f, 180.0f), FVector(1.5f));
 
-    Renderer->LoadMesh(&Mesh);
-    Renderer->SetMultiSampleAntiAliasing(false, MSAAFactor);
+    Mesh.BuildBVH();
+    return 0;
 
-    while (true)
-    {
-        if (std::optional<int32> RunCode = FWindow::ProcessMessages())
-        {
-            return *RunCode;
-        }
-        Tick(0.1f);
-    }
+    // Renderer->LoadMesh(&Mesh);
+    // Renderer->SetMultiSampleAntiAliasing(false, MSAAFactor);
+
+    // while (true)
+    // {
+    //     if (std::optional<int32> RunCode = FWindow::ProcessMessages())
+    //     {
+    //         return *RunCode;
+    //     }
+    //     Tick(0.1f);
+    // }
 }
 
 void OEngine::Tick(float DeltaTime)

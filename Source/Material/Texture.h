@@ -7,25 +7,24 @@
 #include "Texture.h"
 #pragma warning(default : 4819)
 
-enum class ETextureSampleMode
-{
-    Nearest,
-    Bilinear
-};
-
 struct FTexture
 {
     int32 Width = 0;
     int32 Height = 0;
 
     uint8* Data = nullptr;
-    // cv::Mat ImageData;
 
 public:
     FTexture(const FString& Path);
     ~FTexture();
 
     FColor ReadPixel(int32 U, int32 V) const;
+};
+
+enum class ETextureSampleMode
+{
+    Nearest,
+    Bilinear
 };
 
 class FTexureSampler

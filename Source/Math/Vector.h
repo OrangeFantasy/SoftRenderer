@@ -39,6 +39,10 @@ public:
     static const TVector<T> ZeroVector;
 
 public:
+    static TVector<T> Min(const TVector<T>& A, const TVector<T>& B);
+    static TVector<T> Max(const TVector<T>& A, const TVector<T>& B);
+    static TVector<T> Lerp(const TVector<T>& A, const TVector<T>& B, T Alpha);
+
     static TVector<T> CrossProduct(const TVector<T>& A, const TVector<T>& B);
     static T DotProduct(const TVector<T>& A, const TVector<T>& B);
 
@@ -59,9 +63,6 @@ public:
     TVector<T> operator-=(const TVector<T>& V);
     TVector<T> operator*=(const TVector<T>& V);
     TVector<T> operator/=(const TVector<T>& V);
-
-    bool operator==(const TVector<T>& V) const;
-    bool operator!=(const TVector<T>& V) const;
 
     template <typename FArg, typename = std::enable_if_t<std::is_arithmetic<FArg>::value>>
     TVector<T> operator+(FArg Bias) const
@@ -107,6 +108,11 @@ public:
         return *this;
     }
 
+    T& operator[](int32 Index);
+
+    bool operator==(const TVector<T>& V) const;
+    bool operator!=(const TVector<T>& V) const;
+
     bool Equals(const TVector<T>& V, T Tolerance = KINDA_SMALL_NUMBER) const;
 
     T Length() const;
@@ -132,6 +138,24 @@ inline TVector<T>::TVector(T InF) : X(InF), Y(InF), Z(InF)
 template <typename T>
 inline TVector<T>::TVector(T InX, T InY, T InZ) : X(InX), Y(InY), Z(InZ)
 {
+}
+
+template <typename T>
+inline TVector<T> TVector<T>::Min(const TVector<T>& A, const TVector<T>& B)
+{
+    return TVector<T>(FMath::Min(A.X, B.X), FMath::Min(A.Y, B.Y), FMath::Min(A.Z, B.Z));
+}
+
+template <typename T>
+inline TVector<T> TVector<T>::Max(const TVector<T>& A, const TVector<T>& B)
+{
+    return TVector<T>(FMath::Max(A.X, B.X), FMath::Max(A.Y, B.Y), FMath::Max(A.Z, B.Z));
+}
+
+template <typename T>
+inline TVector<T> TVector<T>::Lerp(const TVector<T>& A, const TVector<T>& B, T Alpha)
+{
+    return Alpha * A + (1 - Alpha) * B;
 }
 
 template <typename T>
@@ -234,6 +258,12 @@ inline TVector<T> TVector<T>::operator/=(const TVector<T>& V)
     Y /= V.Y;
     Z /= V.Z;
     return *this;
+}
+
+template <typename T>
+inline T& TVector<T>::operator[](int32 Index)
+{
+    return XYZ[Index];
 }
 
 template <typename T>

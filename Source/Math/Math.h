@@ -7,10 +7,12 @@
 #define KINDA_SMALL_NUMBER 1.e-4f
 #define SMALL_NUMBER 1.e-8f
 
-#define PI 3.1415926535897932f
+constexpr float PI = 3.1415926535897932f;
+constexpr float PI_HALF = 1.5707963267948966f;
+constexpr float PI_INV = 1.f / PI;
 
-constexpr float FLOAT_MAX = 3.402823466e+38f;
-constexpr float FLOAT_MIN = 1.175494351e-38f;
+constexpr float FLOAT_MAX = FLT_MAX;
+constexpr float FLOAT_MIN = FLT_MIN;
 
 class FMath
 {
@@ -90,7 +92,7 @@ public:
         return Max(First, Max(Other...));
     }
 
-        template <typename T, typename... Args>
+    template <typename T, typename... Args>
     static constexpr FORCEINLINE T Min(const T First, const Args... Other)
     {
         return Min(First, Min(Other...));
@@ -103,4 +105,8 @@ public:
         A = B;
         B = Temp;
     }
+
+    static FORCEINLINE float RandomFloat() { return (float)rand() / RAND_MAX; }
+
+    static FORCEINLINE float RandomFloat(float Min, float Max) { return Min + (Max - Min) * RandomFloat(); }
 };

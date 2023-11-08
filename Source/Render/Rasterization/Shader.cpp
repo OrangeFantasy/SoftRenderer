@@ -1,6 +1,6 @@
 #include "Render/Rasterization/Shader.h"
 
-#include "Geometry/Texture.h"
+#include "Material/Texture.h"
 
 void FShader::UploadViewPorjectionMatrix(const FMatrix4& InViewMatrix, const FMatrix4& InProjectionMatrix)
 {

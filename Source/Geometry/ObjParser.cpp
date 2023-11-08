@@ -56,9 +56,9 @@ FMesh FObjParser::Parse(const FString& FilePath)
 
                 for (FVertex& Vertex : Vertices)
                 {
-                    Mesh.Vertices.emplace_back(Vertex);
+                    Mesh.AddVertex(Vertex);
                 }
-                Mesh.Indices.emplace_back(FVector3i(VertexIndex, VertexIndex + 1, VertexIndex + 2));
+                Mesh.AddIndex(FVector3i(VertexIndex, VertexIndex + 1, VertexIndex + 2));
 
                 VertexIndex += 3;
             }

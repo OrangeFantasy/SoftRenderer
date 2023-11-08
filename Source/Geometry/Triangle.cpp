@@ -1,8 +1,21 @@
-// #include "Geometry/Triangle.h"
+#include "Geometry/Triangle.h"
 
-// FTriangle::FTriangle() {}
+FTriangle::FTriangle(const FVertex& InA, const FVertex& InB, const FVertex& InC) : A(InA), B(InB), C(InC)
+{
+    FVector E1 = B.Position - A.Position;
+    FVector E2 = C.Position - A.Position;
+    Area = 0.5f * FVector::CrossProduct(E1, E2).Length();
+}
 
-// FTriangle::FTriangle(const FVertex& InA, const FVertex& InB, const FVertex& InC) : A(InA), B(InB), C(InC) {}
+FBoundingBox FTriangle::GetBoundingBox() const
+{
+    return FBoundingBox(A.Position, B.Position) | C.Position;
+}
+
+float FTriangle::GetArea() const
+{
+    return Area;
+}
 
 // void FTriangle::SetVertex(int32 Index, const FVertex& Vertex)
 // {

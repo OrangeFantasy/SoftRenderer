@@ -15,6 +15,7 @@ FRasterizationRenderer::~FRasterizationRenderer()
 
 bool FRasterizationRenderer::Initialize(const FViewport& InViewport, const FCamera& InCamera, EShaderType InShaderType)
 {
+    // Create shader.
     switch (InShaderType)
     {
     case EShaderType::TextureShader:
@@ -27,6 +28,7 @@ bool FRasterizationRenderer::Initialize(const FViewport& InViewport, const FCame
         break;
     }
 
+    // Set camera and viewport. Allocate render target buffer and depth buffer.
     if (Shader != nullptr)
     {
         Camera = InCamera;
@@ -50,6 +52,7 @@ void FRasterizationRenderer::SetMultiSampleAntiAliasing(bool bEnable, int32 Fact
     bMSAA = bEnable;
     MSAAFactor = Factors;
 
+    // Allocate MSAA buffer, and compute MSAA sample offset points.
     if (bMSAA && MSAAFactor != 0)
     {
         MSAADepthBuffer.resize((std::size_t)(Viewport.Width * Viewport.Height * MSAAFactor));
@@ -125,10 +128,12 @@ void FRasterizationRenderer::Clear()
 
 void FRasterizationRenderer::Render()
 {
+    // Update view and projection matrix.
     UpdateViewMatrix();
     UpdateProjectionMatrix();
     Shader->UploadViewPorjectionMatrix(ViewMatrix, ProjectionMatrix);
 
+    // Update the model matrix and rasterize for each mesh.
     for (FMesh* Mesh : Meshes)
     {
         Mesh->UpdateModelMatrix();
@@ -140,17 +145,20 @@ void FRasterizationRenderer::Render()
 
 void FRasterizationRenderer::RenderInternal(const FMesh* Mesh)
 {
-    const TArray<FVertex>& Vertices = Mesh->Vertices;
-    const TArray<FVector3i>& Indices = Mesh->Indices;
+    const TArray<FVertex>& Vertices = Mesh->GetVertices();
+    const TArray<FVector3i>& Indices = Mesh->GetIndices();
 
+    // Iterate through each triangle.
     for (const FVector3i& TriangleIndex : Indices)
     {
         FTrianglePrimitive TrianglePrimitive;
 
+        // Iterate through each vertex index to assemble the triangle primitive.
         for (int32 i = 0; i < 3; ++i)
         {
             FVertex Vex = Vertices[TriangleIndex.XYZ[i]];
 
+            // Transform vertex info.
             FVertexPrimitive VertexPrimitive;
             VertexPrimitive.Position = Vex.Position;
             VertexPrimitive.Normal = Vex.Normal;
@@ -160,10 +168,11 @@ void FRasterizationRenderer::RenderInternal(const FMesh* Mesh)
             TrianglePrimitive.Vertices[i] = VertexPrimitive;
         }
 
+        // Pixel shading for each triangle.
         switch (RasterizationMode)
         {
         case ERasterizationMode::Triangle:
-            RenderTriangle(TrianglePrimitive, Mesh->Texture);
+            RenderTriangle(TrianglePrimitive, Mesh->GetTexture());
             break;
         case ERasterizationMode::Line:
             // RenderWireframe(Triangle);
@@ -180,17 +189,20 @@ void FRasterizationRenderer::RenderTriangle(const FTrianglePrimitive& TrianglePr
     const FVertexPrimitive& VexB = TrianglePrimitive.B;
     const FVertexPrimitive& VexC = TrianglePrimitive.C;
 
+    // Compute bounding box of shading.
     int32 MinX = FMath::Clamp((int32)FMath::Floor(FMath::Min(VexA.Position.X, VexB.Position.X, VexC.Position.X)), 0, Viewport.Width);
     int32 MaxX = FMath::Clamp((int32)FMath::Ceil(FMath::Max(VexA.Position.X, VexB.Position.X, VexC.Position.X)), 0, Viewport.Width);
     int32 MinY = FMath::Clamp((int32)FMath::Floor(FMath::Min(VexA.Position.Y, VexB.Position.Y, VexC.Position.Y)), 0, Viewport.Height);
     int32 MaxY = FMath::Clamp((int32)FMath::Ceil(FMath::Max(VexA.Position.Y, VexB.Position.Y, VexC.Position.Y)), 0, Viewport.Height);
 
+    // Iterate over each pixel in the bouding box.
     for (int32 X = MinX; X < MaxX; ++X)
     {
         for (int32 Y = MinY; Y < MaxY; ++Y)
         {
             int32 PixelIndex = GetPixelIndex(X, Y);
 
+            // Multi sample anti-aliasing.
             if (bMSAA)
             {
                 int32 ShadePoints = 0;
@@ -233,17 +245,20 @@ void FRasterizationRenderer::RenderTriangle(const FTrianglePrimitive& TrianglePr
                     FrameBuffer[PixelIndex] = PixelColor.ToFColorSRGB();
                 }
             }
+            // No anti-aliasing
             else
             {
                 float SampleX = X + 0.5f;
                 float SampleY = Y + 0.5f;
 
+                // If the pixel is within triangle, the interpolation factor is calculated and the pixel is shaded.
                 if (FTrianglePrimitive::PointInsideTriangle(SampleX, SampleY, TrianglePrimitive))
                 {
                     float U, V, W;
                     FTrianglePrimitive::GetTriangleBarycentric2D(SampleX, SampleY, TrianglePrimitive, U, V, W);
                     float Reciprocal = 1.0f / (U + V + W);
 
+                    // Pixel shading is done if the current depth value is samller.
                     float InterpolatedZ = (U * VexA.Position.Z + V * VexB.Position.Z + W * VexC.Position.Z) * Reciprocal;
                     if (InterpolatedZ < DepthBuffer[PixelIndex])
                     {
@@ -256,7 +271,7 @@ void FRasterizationRenderer::RenderTriangle(const FTrianglePrimitive& TrianglePr
                         FLinearColor PixelColor;
                         Shader->PixelShader(PixelColor, VS_Position, Normal, TexCoord, Texture);
 
-                        FrameBuffer[PixelIndex] = PixelColor.ToFColorSRGB();
+                        FrameBuffer[PixelIndex] = PixelColor.ToFColorSRGB(); // Convert to sRGB for display.
                     }
                 }
             }

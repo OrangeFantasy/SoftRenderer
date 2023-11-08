@@ -5,9 +5,9 @@
 #include "Render/Rasterization/Shader.h"
 
 struct FVertex;
-// struct FTriangle;
-struct FMesh;
 struct FTrianglePrimitive;
+
+class FMesh;
 
 enum class ERasterizationMode
 {
