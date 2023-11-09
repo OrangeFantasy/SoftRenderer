@@ -5,7 +5,7 @@
 struct FHitResult
 {
     bool bHit = false;
-    float Time = 0.0f;
+    float Time = FLOAT_MAX;
     FVector Location = FVector::ZeroVector;
     FVector Normal = FVector::ZeroVector;
     FVector Emission = FVector::ZeroVector;

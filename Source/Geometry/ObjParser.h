@@ -8,6 +8,7 @@ class FObjParser
 public:
     static FMesh Parse(const FString& FilePath);
 
+private:
     static void GenerateVertices(          //
         TArray<FVertex>& OutVertices,      //
         const TArray<FVector>& Positions,  //

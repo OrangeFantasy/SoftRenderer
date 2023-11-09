@@ -18,10 +18,9 @@ set(OPENCV_DIR ${THIRD_PARTY_DIR}/OpenCV)
 include_directories(
     ${SOURCE_DIR}
     ${OPENCV_DIR}/build/include
-    )
+)
 
-# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}" /SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup) 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup")
+# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup")
 
 add_executable(${PROJECT_NAME} ${HEADER_FILE} ${SOURCE_FILE})
 
@@ -31,12 +30,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "/EHsc")
 add_definitions(-DUNICODE -D_UNICODE)
 
 target_link_libraries(${PROJECT_NAME}
-    ${OPENCV_DIR}/build/x64/vc16/lib/opencv_world470d.lib
-    # ${OPENCV_DIR}/build/x64/vc16/lib/opencv_world470.lib
+    # ${OPENCV_DIR}/build/x64/vc16/lib/opencv_world470d.lib
+    ${OPENCV_DIR}/build/x64/vc16/lib/opencv_world470.lib
 )
-
-# add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-# 	COMMAND ${CMAKE_COMMAND} -E copy_directory
-# 		"${LLVM_DIR}/bin/x64"
-# 		$<TARGET_FILE_DIR:${PROJECT_NAME}>
-# )

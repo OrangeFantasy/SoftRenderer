@@ -27,5 +27,5 @@ private:
     TArray<FGeometry*> Meshes;
 
     FBoundingVolumeHierarchy* BVH = nullptr;
-    float RussianRoulette = 0.5f;
+    float RussianRoulette = 0.8f;
 };

@@ -16,7 +16,7 @@ public:
         }
     }
 
-    const FVector& GetCameraPosition() const { return Position; }
+    const FVector& GetCameraLocation() const { return Position; }
     float GetCameraFov() const { return Fov; }
 
     void SetViewRadius(float DeltaRadius)

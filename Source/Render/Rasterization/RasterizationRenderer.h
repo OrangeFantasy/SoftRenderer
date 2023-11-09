@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreTypes.h"
+#include "Render/Renderer.h"
 #include "Render/Camera.h"
 #include "Render/Rasterization/Shader.h"
 
@@ -29,7 +29,7 @@ struct FViewport
     }
 };
 
-class FRasterizationRenderer
+class FRasterizationRenderer : public FRenderer
 {
 public:
     FRasterizationRenderer() = default;

@@ -89,7 +89,7 @@ void FRasterizationRenderer::ComputeViewportMatrix()
 
 void FRasterizationRenderer::UpdateViewMatrix()
 {
-    const FVector& CameraPosition = Camera.GetCameraPosition();
+    const FVector& CameraPosition = Camera.GetCameraLocation();
 
     ViewMatrix = FMatrix4(          //
         1, 0, 0, -CameraPosition.X, //

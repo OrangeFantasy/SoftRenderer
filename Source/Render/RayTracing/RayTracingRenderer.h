@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreTypes.h"
+#include "Render/Renderer.h"
 #include "Render/Camera.h"
 
 #include <mutex>
@@ -8,13 +8,13 @@
 struct FViewport;
 class FScene;
 
-class FRatTracingRenderer
+class FRayTracingRenderer : public FRenderer
 {
 public:
-    FRatTracingRenderer(int32 InWidth, int32 InHeight, const FCamera& InCamera);
+    FRayTracingRenderer(int32 InWidth, int32 InHeight, const FCamera& InCamera);
 
     void AddScene(FScene* InScene);
-    void Render(int32 SPP);
+    void Render(int32 SPP, bool bMultiThread = true);
 
     // const FColor* GetFrameBuffer() const { return FrameBuffer.data(); }
     const FVector* GetFrameBuffer() const { return FrameBuffer.data(); }

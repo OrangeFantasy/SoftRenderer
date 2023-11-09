@@ -21,8 +21,9 @@ struct FMaterial
 
 public:
     FMaterial();
-    FMaterial(EMaterialType InMaterialType, const FVector& InAlbedo, const FVector& InEmission, const FVector& InKd, const FVector& InKs,
-        float InSpecularExponent = 0.0f, float InIndexOfRefraction = 0.0f);
+    FMaterial(EMaterialType InMaterialType, const FVector& InAlbedo, const FVector& InEmission = FVector(0.0f),
+        const FVector& InKd = FVector(0.0f), const FVector& InKs = FVector(0.0f), float InSpecularExponent = 0.0f,
+        float InIndexOfRefraction = 0.0f);
 
     bool IsEmission() const;
 

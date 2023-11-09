@@ -1,6 +1,7 @@
 #include "Engine/Engine.h"
 
 #include "Render/Rasterization/RasterizationRenderer.h"
+#include "Render/RayTracing/RayTracingRenderer.h"
 #include "Render/Window.h"
 #include "Geometry/ObjParser.h"
 #include "Material/Texture.h"
@@ -46,7 +47,7 @@ bool OEngine::Initialize()
 
 void OEngine::Destory() noexcept
 {
-    cv::destroyAllWindows();
+    // cv::destroyAllWindows();
 }
 
 int32 OEngine::Run()
@@ -59,9 +60,6 @@ int32 OEngine::Run()
     // FTexture Texture = FTexture(AUTO_TEXT("../../Resources/Spot/spot_texture.png"));
     Mesh.SetTexture(&Texture);
     Mesh.SetTransform(FVector::ZeroVector, FVector(90.0f, 0.0f, 180.0f), FVector(1.5f));
-
-    // Mesh.BuildBVH();
-    // return 0;
 
     Renderer->LoadMesh(&Mesh);
     Renderer->SetMultiSampleAntiAliasing(false, MSAAFactor);

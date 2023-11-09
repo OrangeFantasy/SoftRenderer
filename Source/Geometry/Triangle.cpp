@@ -55,7 +55,7 @@ void FTriangle::LineTrace(FHitResult& OutHitResult, const FRay& Ray)
         float Det = FVector::DotProduct(S1, E1);
         if (FMath::Abs(Det) > KINDA_SMALL_NUMBER)
         {
-            FVector S = Ray.Direction - A.Position;
+            FVector S = Ray.Origin - A.Position;
             FVector S2 = FVector::CrossProduct(S, E1);
 
             float DetInv = 1.0f / Det;

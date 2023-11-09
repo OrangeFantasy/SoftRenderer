@@ -58,9 +58,9 @@ FVector FScene::Shade(const FHitResult& Hit, const FVector& Wo)
         if (ObstacleHit.Time - LightVector.Length() > -KINDA_SMALL_NUMBER)
         {
             FVector Fr = Hit.Material->Evaluate(LightDirection, Wo, Hit.Normal);
-            float R2 = LightVector.SquaredLength();
+            float R2 = LightVector.Length();
             float CosA = FMath::Max(0.0f, FVector::DotProduct(LightDirection, Hit.Normal));
-            float CosB = FMath::Max(0.0f, -FVector::DotProduct(LightDirection, LightHit.Normal));
+            float CosB = FMath::Max(0.0f, FVector::DotProduct(-LightDirection, LightHit.Normal));
             LoDirect = LightHit.Emission * Fr * CosA * CosB / (R2 * PDF);
         }
     }
