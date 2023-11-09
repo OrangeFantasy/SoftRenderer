@@ -13,7 +13,7 @@ struct FBVHNode
 
     FGeometry* Object;
     FBoundingBox BoundingBox;
-    // float Area;
+    float Area;
 
 public:
     FBVHNode();
@@ -29,9 +29,11 @@ public:
     FBVHNode* BuildBVH(TArray<FGeometry*>& Primitives, int32 Start, int32 End);
 
     void LineTrace(FHitResult& OutHitResult, const FRay& Ray);
+    void Sample(FHitResult& OutHitResultm, float& OutPDF);
 
 private:
     void LineTrace(FHitResult& OutHitResult, const FBVHNode* Node, const FRay& Ray);
+    void Sample(FHitResult& OutHitResult, float& OutPDF, const FBVHNode* Node, float P);
 
 private:
     FBVHNode* Root;

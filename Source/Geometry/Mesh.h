@@ -60,11 +60,13 @@ private:
     // ********************
 
 public:
-    virtual void BuildBVH() override;
-    virtual void LineTrace(FHitResult& OutHitResult, const FRay& Ray);
-
     virtual FBoundingBox GetBoundingBox() const override { return BoundingBox; };
     virtual float GetArea() const override { return Area; };
+    virtual bool IsEmission() const override;
+
+    virtual void BuildBVH() override;
+    virtual void LineTrace(FHitResult& OutHitResult, const FRay& Ray) override;
+    virtual void Sample(FHitResult& OutHitResult, float& OutPdf) override;
 
 private:
     void DestroyBVH() noexcept;

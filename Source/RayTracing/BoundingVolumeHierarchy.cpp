@@ -8,7 +8,7 @@
 //       BVH Node
 // ********************
 
-FBVHNode::FBVHNode() : Left(nullptr), Right(nullptr), Object(nullptr), BoundingBox(FBoundingBox()) /**, Area(0.0f)*/ {}
+FBVHNode::FBVHNode() : Left(nullptr), Right(nullptr), Object(nullptr), BoundingBox(FBoundingBox()), Area(0.0f) {}
 
 FBVHNode::~FBVHNode()
 {
@@ -30,7 +30,7 @@ FBVHNode::~FBVHNode()
 
 FBoundingVolumeHierarchy::FBoundingVolumeHierarchy(TArray<FGeometry*> Primitives)
 {
-    for(FGeometry* Primitive : Primitives)
+    for (FGeometry* Primitive : Primitives)
     {
         Primitive->BuildBVH();
     }
@@ -62,6 +62,7 @@ FBVHNode* FBoundingVolumeHierarchy::BuildBVH(TArray<FGeometry*>& Primitives, int
     {
         BVHNode->Object = Primitives[Begin];
         BVHNode->BoundingBox = Primitives[Begin]->GetBoundingBox();
+        BVHNode->Area = Primitives[Begin]->GetArea();
     }
     else
     {
@@ -80,6 +81,7 @@ FBVHNode* FBoundingVolumeHierarchy::BuildBVH(TArray<FGeometry*>& Primitives, int
         BVHNode->Left = BuildBVH(Primitives, Begin, Mid);
         BVHNode->Right = BuildBVH(Primitives, Mid, End);
         BVHNode->BoundingBox = BVHNode->Left->BoundingBox | BVHNode->Right->BoundingBox;
+        BVHNode->Area = BVHNode->Left->Area + BVHNode->Right->Area;
     }
     return BVHNode;
 }
@@ -108,6 +110,25 @@ void FBoundingVolumeHierarchy::LineTrace(FHitResult& OutHitResult, const FBVHNod
     }
 }
 
+void FBoundingVolumeHierarchy::Sample(FHitResult& OutHitResultm, float& OutPDF)
+{
+    float P = FMath::Sqrt(FMath::RandomFloat()) * Root->Area;
+    Sample(OutHitResultm, OutPDF, Root, P);
+    OutPDF /= Root->Area;
+}
+
+void FBoundingVolumeHierarchy::Sample(FHitResult& OutHitResult, float& OutPDF, const FBVHNode* Node, float P)
+{
+    if (Node->Object != nullptr)
+    {
+        Node->Object->Sample(OutHitResult, OutPDF);
+        OutPDF *= Node->Area;
+        return;
+    }
+    P < Node->Left->Area ? Sample(OutHitResult, OutPDF, Node->Left, P) //
+                         : Sample(OutHitResult, OutPDF, Node->Right, P - Node->Left->Area);
+}
+
 static int32 NodeNum = 0;
 
 void PreOrderTraversal(FBVHNode* Root, int32 Depth)
@@ -126,7 +147,7 @@ void PreOrderTraversal(FBVHNode* Root, int32 Depth)
         }
         DebugString += AUTO_TEXT("Flag\n");
 
-        OutputDebugString(DebugString.c_str());
+        FDebugString::Printf(DebugString);
         PreOrderTraversal(Root->Left, Depth + 1);
         PreOrderTraversal(Root->Right, Depth + 1);
     }
@@ -137,5 +158,5 @@ void FBoundingVolumeHierarchy::Print()
     PreOrderTraversal(Root, 1);
 
     FString DebugString = AUTO_TEXT("Node Num: ") + std::to_wstring(NodeNum) + AUTO_TEXT("\n");
-    OutputDebugString(DebugString.c_str());
+    FDebugString::Printf(DebugString);
 }

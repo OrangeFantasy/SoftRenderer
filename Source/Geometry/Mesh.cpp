@@ -1,7 +1,8 @@
 #include "Geometry/Mesh.h"
 #include "Geometry/Triangle.h"
 #include "RayTracing/BoundingVolumeHierarchy.h"
-#include "Mesh.h"
+#include "RayTracing/HitResult.h"
+#include "Material/Material.h"
 
 FMesh::FMesh() : Name(AUTO_TEXT("Mesh")) {}
 
@@ -53,6 +54,11 @@ void FMesh::UpdateModelMatrix()
     ModelMatrix = TranslationMatrix * RotationMatrix * ScaleMatrix;
 }
 
+bool FMesh::IsEmission() const
+{
+    return Material == nullptr ? false : Material->IsEmission();
+}
+
 void FMesh::BuildBVH()
 {
     for (const FVector3i& Index : Indices)
@@ -75,7 +81,13 @@ void FMesh::LineTrace(FHitResult& OutHitResult, const FRay& Ray)
     }
 }
 
+void FMesh::Sample(FHitResult& OutHitResult, float& OutPdf)
+{
+    BVH->Sample(OutHitResult, OutPdf);
+}
+
 void FMesh::DestroyBVH() noexcept
+
 {
     if (BVH != nullptr)
     {

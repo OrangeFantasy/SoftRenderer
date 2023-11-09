@@ -3,6 +3,7 @@
 #include "Geometry/BoundingBox.h"
 #include "RayTracing/HitResult.h"
 #include "RayTracing/Ray.h"
+#include "Material/Material.h"
 
 FTriangle::FTriangle(const FVertex& InA, const FVertex& InB, const FVertex& InC, FMaterial* InMaterial)
     : A(InA), B(InB), C(InC), Material(InMaterial)
@@ -21,6 +22,11 @@ FBoundingBox FTriangle::GetBoundingBox() const
 float FTriangle::GetArea() const
 {
     return Area;
+}
+
+bool FTriangle::IsEmission() const
+{
+    return Material == nullptr ? false : Material->IsEmission();
 }
 
 void FTriangle::LineTrace(FHitResult& OutHitResult, const FRay& Ray)
@@ -60,12 +66,26 @@ void FTriangle::LineTrace(FHitResult& OutHitResult, const FRay& Ray)
             if (T >= 0 && U >= 0.0f && V >= 0.0f && U + V <= 1.0f)
             {
                 OutHitResult.bHit = true;
+                OutHitResult.Time = T;
                 OutHitResult.Location = Ray.GetLocation(T);
                 OutHitResult.Normal = Normal;
-                OutHitResult.Time = T;
                 OutHitResult.Object = this;
                 OutHitResult.Material = Material;
             }
         }
     }
+}
+void FTriangle::Sample(FHitResult& OutHitResult, float& OutPdf)
+{
+    float R1 = FMath::RandomFloat();
+    float R2 = FMath::RandomFloat();
+
+    OutHitResult.bHit = true;
+    OutHitResult.Location = (1 - R1) * A.Position + (R1 * (1 - R2)) * B.Position + (R1 * R2) * C.Position;
+    OutHitResult.Normal = Normal;
+    OutHitResult.Emission = Material->Emission;
+    OutHitResult.Object = this;
+    OutHitResult.Material = Material;
+
+    OutPdf = 1.0f / Area;
 }

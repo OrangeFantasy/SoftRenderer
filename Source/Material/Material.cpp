@@ -1,5 +1,4 @@
 #include "Material/Material.h"
-#include "Material.h"
 
 FMaterial::FMaterial()
     : MaterialType(EMaterialType::DIFFUSE), Albedo(FVector::ZeroVector), Emission(FVector::ZeroVector), Kd(FVector::ZeroVector),
@@ -59,7 +58,7 @@ FVector FMaterial::Sample(const FVector& Wi, const FVector& N) const
     }
 }
 
-float FMaterial::Pdf(const FVector& Wi, const FVector& Wo, const FVector& N) const
+float FMaterial::PDF(const FVector& Wi, const FVector& Wo, const FVector& N) const
 {
     switch (MaterialType)
     {

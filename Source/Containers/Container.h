@@ -62,3 +62,9 @@ public:
 private:
     static FAString WStringToAString(const FWString& SrcString);
 };
+
+class FDebugString
+{
+public:
+    static void Printf(const FString& String);
+};

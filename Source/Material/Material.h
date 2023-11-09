@@ -33,7 +33,7 @@ public:
     FVector Sample(const FVector& Wi, const FVector& N) const;
 
     // The pdf of the sampling method.
-    float Pdf(const FVector& Wi, const FVector& Wo, const FVector& N) const;
+    float PDF(const FVector& Wi, const FVector& Wo, const FVector& N) const;
 
 private:
     FVector LocalToWorld(const FVector& V, const FVector& N) const;

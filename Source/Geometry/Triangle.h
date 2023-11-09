@@ -12,7 +12,10 @@ public:
 
     virtual FBoundingBox GetBoundingBox() const override;
     virtual float GetArea() const override;
+    virtual bool IsEmission() const override;
+
     virtual void LineTrace(FHitResult& OutHitResult, const FRay& Ray) override;
+    virtual void Sample(FHitResult& OutHitResult, float& OutPdf) override;
 
 private:
     union

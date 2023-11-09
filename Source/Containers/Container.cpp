@@ -19,3 +19,10 @@ FAString FStringUtils::WStringToAString(const FWString& SrcString)
     return "Only support Windows platform";
 #endif
 }
+
+void FDebugString::Printf(const FString& String)
+{
+#ifdef _WIN32
+    OutputDebugString(String.c_str());
+#endif
+}

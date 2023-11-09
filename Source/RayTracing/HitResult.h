@@ -4,11 +4,12 @@
 
 struct FHitResult
 {
-    class FGeometry* Object;
-    struct FMaterial* Material;
+    bool bHit = false;
+    float Time = 0.0f;
+    FVector Location = FVector::ZeroVector;
+    FVector Normal = FVector::ZeroVector;
+    FVector Emission = FVector::ZeroVector;
 
-    bool bHit;
-    float Time;
-    FVector Location;
-    FVector Normal;
+    class FGeometry* Object = nullptr;
+    struct FMaterial* Material = nullptr;
 };
