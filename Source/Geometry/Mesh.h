@@ -43,9 +43,11 @@ private:
     // ********************
 
 public:
+    void UpdateModelMatrix();
     void SetTransform(
         const FVector& InTranslation = FVector(0.0f), const FVector& InRotation = FVector(0.0f), const FVector& InScale = FVector(1.0f));
-    void UpdateModelMatrix();
+    void ApplyTransform(
+        const FVector& InTranslation = FVector(0.0f), const FVector& InRotation = FVector(0.0f), const FVector& InScale = FVector(1.0f));
 
 public:
     FMatrix4 ModelMatrix;

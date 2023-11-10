@@ -20,14 +20,20 @@ include_directories(
     ${OPENCV_DIR}/build/include
 )
 
-# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup")
-
 add_executable(${PROJECT_NAME} ${HEADER_FILE} ${SOURCE_FILE})
 
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} /O2 /Ob2")
 set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "/EHsc")
-    
+
 add_definitions(-DUNICODE -D_UNICODE)
+
+set(SOFT_RAY_TRACING ON)
+option(SOFT_RAY_TRACING "Soft Ray Tracing" ON)
+if(SOFT_RAY_TRACING)
+    add_definitions(-DSOFT_RAY_TRACING)
+else()
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:WinMainCRTStartup")
+endif()
 
 target_link_libraries(${PROJECT_NAME}
     # ${OPENCV_DIR}/build/x64/vc16/lib/opencv_world470d.lib

@@ -87,7 +87,7 @@ void FRayTracingRenderer::RenderThread(int32 Begin, int32 End, int32 SPP)
     {
         for (int32 Col = 0; Col < Width; ++Col)
         {
-            FVector RTPixelVector;
+            FVector RTPixelColor;
             for (int32 SPPIndex = 0; SPPIndex < SPP; ++SPPIndex)
             {
                 float X = (2 * (Col + FMath::RandomFloat()) / Width - 1) * Scale * AspectRatio;
@@ -96,11 +96,11 @@ void FRayTracingRenderer::RenderThread(int32 Begin, int32 End, int32 SPP)
                 FVector Direction = FVector(-X, Y, 1.0f).GetSafeNormal();
                 FRay Ray = FRay(Camera.GetCameraLocation(), Direction);
 
-                RTPixelVector += RayTracing(Ray, 0);
+                RTPixelColor += RayTracing(Ray, 0);
             }
 
             int32 PixelIndex = Row * Width + Col;
-            FrameBuffer[PixelIndex] = RTPixelVector / SPP;
+            FrameBuffer[PixelIndex] = RTPixelColor / SPP;
         }
         Mutex.lock();
         ++RowComplatedNum;

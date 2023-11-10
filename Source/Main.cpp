@@ -1,5 +1,3 @@
-#define SOFT_RAY_TRACING
-
 #ifndef SOFT_RAY_TRACING
 #include "Engine/Engine.h"
 
@@ -40,15 +38,12 @@ int WINAPI WinMain(                   // WinMain
 
 int main()
 {
-    FMaterial M_Red = FMaterial(EMaterialType::DIFFUSE, FVector(0.0f), FVector(0.0f), FVector(0.63f, 0.065f, 0.05f));
-    FMaterial M_Green = FMaterial(EMaterialType::DIFFUSE, FVector(0.0f), FVector(0.0f), FVector(0.14f, 0.45f, 0.091f));
-    FMaterial M_White = FMaterial(EMaterialType::DIFFUSE, FVector(0.0f), FVector(0.0f), FVector(0.725f, 0.71f, 0.68f));
-    FMaterial M_Floor = FMaterial(EMaterialType::DIFFUSE, FVector(0.0f), FVector(0.0f), FVector(0.15, 0.3f, 0.3f));
-
-    // FVector LightIntensity = 8.0f * FVector(0.747f + 0.058f, 0.747f + 0.258f, 0.747f) +  //
-    //                          15.6f * FVector(0.740f + 0.287f, 0.740f + 0.160f, 0.740f) + //
-    //                          18.4f * FVector(0.737f + 0.642f, 0.737f + 0.159f, 0.737f);
-    FMaterial M_Light = FMaterial(EMaterialType::DIFFUSE, FVector(0.0f), FVector(0.4f), FVector(0.65f, 0.65f, 0.65f));
+    FMaterial M_Red = FMaterial(EMaterialType::MICROFACET, FVector(0.0f), FVector(0.63f, 0.065f, 0.05f));
+    FMaterial M_Green = FMaterial(EMaterialType::MICROFACET, FVector(0.0f), FVector(0.14f, 0.45f, 0.091f), FVector(0.5f));
+    FMaterial M_White = FMaterial(EMaterialType::MICROFACET, FVector(0.0f), FVector(0.725f, 0.71f, 0.68f), FVector(0.2f));
+    FMaterial M_Floor = FMaterial(EMaterialType::MICROFACET, FVector(0.0f), FVector(0.15, 0.3f, 0.3f));
+    FMaterial M_Light = FMaterial(EMaterialType::MICROFACET, FVector(1.0f, 1.0f, 0.6f), FVector(0.65f, 0.65f, 0.65f));
+    FMaterial M_Light2 = FMaterial(EMaterialType::MICROFACET, FVector(0.7f, 0.7f, 1.0f), FVector(0.65f, 0.65f, 0.65f));
 
     FMesh Floor = FObjParser::Parse(AUTO_TEXT("../../Resources/Models/cornellbox/floor.obj"));
     Floor.SetMaterial(&M_Floor);
@@ -60,11 +55,17 @@ int main()
     Left.SetMaterial(&M_Red);
     FMesh Right = FObjParser::Parse(AUTO_TEXT("../../Resources/Models/cornellbox/right.obj"));
     Right.SetMaterial(&M_Green);
+
     FMesh Light = FObjParser::Parse(AUTO_TEXT("../../Resources/Models/cornellbox/light.obj"));
     Light.SetMaterial(&M_Light);
+    FMesh Light2 = Light;
+    Light2.SetMaterial(&M_Light2);
+
+    Light.ApplyTransform(FVector(-180.0f, 0.0f, 0.0f));
+    Light2.ApplyTransform(FVector(180.0f, 0.0f, 0.0f));
 
     FCamera Camera = FCamera(FVector(278, 278, -800), 40.0f);
-    FRayTracingRenderer* RTRenderer = new FRayTracingRenderer(512, 512, Camera);
+    FRayTracingRenderer* RTRenderer = new FRayTracingRenderer(500, 500, Camera);
 
     RTRenderer->AddMesh(&Floor);
     RTRenderer->AddMesh(&ShortBox);
@@ -72,9 +73,10 @@ int main()
     RTRenderer->AddMesh(&Left);
     RTRenderer->AddMesh(&Right);
     RTRenderer->AddMesh(&Light);
+    RTRenderer->AddMesh(&Light2);
 
     RTRenderer->BuildBVH();
-    RTRenderer->Render(256);
+    RTRenderer->Render(128);
 
     delete RTRenderer;
     RTRenderer = nullptr;

@@ -11,13 +11,6 @@ FMesh::~FMesh()
     DestroyBVH();
 }
 
-void FMesh::SetTransform(const FVector& InTranslation, const FVector& InRotation, const FVector& InScale)
-{
-    Translation = InTranslation;
-    Rotation = InRotation;
-    Scale = InScale;
-}
-
 void FMesh::UpdateModelMatrix()
 {
     // Rotation Matrix. Y X Z
@@ -52,6 +45,24 @@ void FMesh::UpdateModelMatrix()
     );
 
     ModelMatrix = TranslationMatrix * RotationMatrix * ScaleMatrix;
+}
+
+void FMesh::SetTransform(const FVector& InTranslation, const FVector& InRotation, const FVector& InScale)
+{
+    Translation = InTranslation;
+    Rotation = InRotation;
+    Scale = InScale;
+}
+
+void FMesh::ApplyTransform(const FVector& InTranslation, const FVector& InRotation, const FVector& InScale)
+{
+    SetTransform(InTranslation, InRotation, InScale);
+    UpdateModelMatrix();
+
+    for (FVertex& Vertex : Vertices)
+    {
+        Vertex.Position = (ModelMatrix * FVector4(Vertex.Position, 1.0f)).ToVector3();
+    }
 }
 
 bool FMesh::IsEmission() const
